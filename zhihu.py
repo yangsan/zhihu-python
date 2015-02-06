@@ -9,6 +9,7 @@ import requests
 import html2text
 import ConfigParser
 from bs4 import BeautifulSoup
+import pyCookieCheat
 
 session = None
 
@@ -21,6 +22,10 @@ def create_session():
     email = cf.get("info", "email")
     password = cf.get("info", "password")
     s = requests.session()
+
+    dict_cookie = pyCookieCheat.chrome_cookies("http://zhihu.com")
+    requests.utils.add_dict_to_cookiejar(s.cookies, dict_cookie)
+
     login_data = {"email": email, "password": password}
     header = {
         'User-Agent': "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:34.0) Gecko/20100101 Firefox/34.0",
@@ -28,9 +33,13 @@ def create_session():
         'Referer': "http://www.zhihu.com/",
         'X-Requested-With': "XMLHttpRequest"
     }
-    r = s.post('http://www.zhihu.com/login', data = login_data, headers = header)
-    if r.json()["r"] == 1:
-        raise Exception("login failed.")
+    #c = s.get('http://www.zhihu.com', headers = header)
+    #print c.text.encode("utf8")
+    #r = s.post('http://www.zhihu.com/login', data = login_data, headers = header)
+    #print r.text.decode("utf-8")
+    #print r
+    #if r.json()["r"] == 1:
+        #raise Exception("login failed.")
     session = s
 
 
@@ -42,10 +51,10 @@ class Question:
 
 
     def __init__(self, url, title = None):
-        
+
         if url[0:len(url) - 8] != "http://www.zhihu.com/question/":
             raise ValueError("\"" + url + "\"" + " : it isn't a question url.")
-        else:     
+        else:
             self.url = url
             if title != None:
                 self.title = title
@@ -134,7 +143,7 @@ class Question:
 
     #     if self.get_answers_num() == 0:
     #         print "No answer."
-    #         return 
+    #         return
     #     else:
     #         if self.soup == None:
     #             self.parser()
@@ -552,7 +561,7 @@ class User:
             if asks_num == 0:
                 return
                 yield
-            else:  
+            else:
                 for i in range((asks_num - 1) / 20 + 1):
                     ask_url = self.user_url + "/asks?page=" + str(i + 1)
                     r = s.get(ask_url)
@@ -560,7 +569,7 @@ class User:
                     for question in soup.find_all("a", class_ = "question_link"):
                         url = "http://www.zhihu.com" + question["href"]
                         title = question.string.encode("utf-8")
-                        yield Question(url, title)                    
+                        yield Question(url, title)
 
     def get_answers(self):
 
@@ -864,7 +873,7 @@ class Answer:
             f.write(text.decode('utf-8').encode('gbk'))
             link_str = "#### 原链接: ".decode('utf-8').encode('gbk')
             f.write(link_str + self.answer_url.decode('utf-8').encode('gbk'))
-        else:   
+        else:
             f.write(text)
             f.write("#### 原链接: " + self.answer_url)
         f.close()
