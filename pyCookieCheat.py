@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-#! /usr/bin/env python3
+#! /usr/bin/env python
 '''pyCookieCheat.py
 20140518 v 2.0: Now works with Chrome's new encrypted cookies
 
@@ -29,7 +29,7 @@ Helpful Links:
 
 import sqlite3
 import os.path
-import urllib.parse
+import urlparse
 import keyring
 import sys
 from Crypto.Cipher import AES
@@ -51,7 +51,8 @@ def chrome_cookies(url):
         # eg if last is '\x0e' then ord('\x0e') == 14, so take off 14.
         # You'll need to change this function to use ord() for python2.
         def clean(x):
-            return x[:-x[-1]].decode('utf8')
+            return x[:-ord(x[-1])].decode('utf8')
+            #return x[:-x[-1]].decode('utf8')
 
         cipher = AES.new(key, AES.MODE_CBC, IV=iv)
         decrypted = cipher.decrypt(encrypted_value)
@@ -81,7 +82,7 @@ def chrome_cookies(url):
     key = PBKDF2(my_pass, salt, length, iterations)
 
     # Part of the domain name that will help the sqlite3 query pick it from the Chrome cookies
-    domain = urllib.parse.urlparse(url).netloc
+    domain = urlparse.urlparse(url).netloc
 
     conn = sqlite3.connect(cookie_file)
     sql = 'select name, value, encrypted_value from cookies '\
