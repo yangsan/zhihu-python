@@ -366,7 +366,7 @@ class User:
                         .find("span", class_ = "name").string.encode("utf-8")
                 self.user_id = user_id
                 if platform.system() == 'Windows':
-                    return user_id.decode('utf-8').encode('gbk')
+                    return user_id.decode('utf-8')
                 else:
                     return user_id
 
