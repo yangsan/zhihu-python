@@ -55,3 +55,6 @@ target/
 
 #
 *.txt
+
+# database
+*.db
